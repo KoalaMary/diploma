@@ -6,6 +6,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 import csv
 import io
 import os
+import pandas as pd
+from random import shuffle
 
 
 class TextPreparation:
@@ -52,8 +54,13 @@ class TextPreparation:
         return [text[x:x + 100] for x in range(0, len(text), 100)]
 
     @staticmethod
-    def get_all_data_files():
+    def get_all_authors():
         path = os.path.join(os.getcwd(), "data")
+        return os.listdir(path)
+
+    @staticmethod
+    def get_all_authors_files(author):
+        path = os.path.join(os.getcwd(), "data", author)
         return os.listdir(path)
 
     def merge_all_data_files(self):
@@ -61,14 +68,16 @@ class TextPreparation:
         file_exists = os.path.isfile(res_path)
 
         if not file_exists:
-            file_names = self.get_all_data_files()
+            authors = self.get_all_authors()
             data_path = os.path.join(os.getcwd(), "data")
 
             with io.open(res_path, 'w', encoding='utf8') as outfile:
-                for file in file_names:
-                    with io.open(data_path + "/" + file, 'r', encoding='utf8') as infile:
-                        for line in infile:
-                            outfile.write(line)
+                for author in authors:
+                    files = self.get_all_authors_files(author=author)
+                    for file in files:
+                        with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
+                            for line in infile:
+                                outfile.write(line)
 
         return res_path
 
@@ -80,14 +89,9 @@ class TextPreparation:
         clear_text = self.prepare_text(''.join(data))
         self.vectorizer.fit(raw_documents=clear_text)
 
-    def create_dictionary(self, file_name):
-        data_path = os.path.join(os.getcwd(), "data", file_name)
+    def create_dictionary(self, file_name, author, author_mark):
+        data_path = os.path.join(os.getcwd(), "data", author, file_name)
         # train_path = os.path.join(os.getcwd(), "train.csv")
-        author = None
-        if "master" in file_name:
-            author = 0
-        elif "tolstoi" in file_name:
-            author = 1
 
         with io.open(data_path, 'r', encoding='utf8') as f:
             data = f.read().splitlines()
@@ -102,7 +106,7 @@ class TextPreparation:
             vector = self.vectorizer.transform(block)
             temp = vector.toarray()[0]
             temp = temp.tolist()
-            temp.append(author)
+            temp.append(author_mark)
 
             result.append(temp)
 
@@ -111,6 +115,25 @@ class TextPreparation:
             wr.writerows(result)
 
     def create_all_dicts(self):
-        file_names = self.get_all_data_files()
-        for file in file_names:
-            self.create_dictionary(file_name=file)
+        authors = self.get_all_authors()
+        author_mark = 0
+        for author in authors:
+            files = self.get_all_authors_files(author=author)
+            for file in files:
+                self.create_dictionary(file_name=file, author=author, author_mark=int(bin(author_mark)[2:]))
+
+            author_mark = author_mark + 1
+
+    @staticmethod
+    def get_dataset():
+        train_path = os.path.join(os.getcwd(), "train.csv")
+        data = pd.read_csv(train_path)
+        dataset = data.values.tolist()
+        shuffle(dataset)
+        x = []
+        y = []
+        for row in dataset:
+            x.append(row[:-1])
+            y.append(row[-1])
+
+        return x, y
