@@ -50,8 +50,8 @@ class TextPreparation:
         return text4
 
     @staticmethod
-    def create_blocks(text):
-        return [text[x:x + 100] for x in range(0, len(text), 100)]
+    def create_blocks(text, blocks_size):
+        return [text[x:x + blocks_size] for x in range(0, len(text), blocks_size)]
 
     @staticmethod
     def get_all_authors():
@@ -89,7 +89,7 @@ class TextPreparation:
         clear_text = self.prepare_text(''.join(data))
         self.vectorizer.fit(raw_documents=clear_text)
 
-    def create_dictionary(self, file_name, author, author_mark):
+    def create_dictionary(self, file_name, author, author_mark, blocks_size):
         data_path = os.path.join(os.getcwd(), "data", author, file_name)
         # train_path = os.path.join(os.getcwd(), "train.csv")
 
@@ -97,7 +97,7 @@ class TextPreparation:
             data = f.read().splitlines()
 
         clear_text = self.prepare_text(''.join(data))
-        blocks = self.create_blocks(clear_text)
+        blocks = self.create_blocks(clear_text, blocks_size)
 
         result = []
 
@@ -114,13 +114,15 @@ class TextPreparation:
             wr = csv.writer(file)
             wr.writerows(result)
 
-    def create_all_dicts(self):
+    def create_all_dicts(self, blocks_size=100):
         authors = self.get_all_authors()
         author_mark = 0
         for author in authors:
             files = self.get_all_authors_files(author=author)
-            for file in files:
-                self.create_dictionary(file_name=file, author=author, author_mark=int(bin(author_mark)[2:]))
+            # for file in files:
+            self.create_dictionary(file_name=files[0], author=author, author_mark=author_mark, blocks_size=blocks_size)
+                # self.create_dictionary(file_name=file, author=author, author_mark=int(bin(author_mark)[2:]),
+                #                        blocks_size=blocks_size)
 
             author_mark = author_mark + 1
 
@@ -135,5 +137,9 @@ class TextPreparation:
         for row in dataset:
             x.append(row[:-1])
             y.append(row[-1])
+
+        print("*****************************")
+        print("LEN X: {}".format(len(x)))
+        print("*****************************")
 
         return x, y

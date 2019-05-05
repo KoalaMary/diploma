@@ -5,17 +5,27 @@ from preprocessing import TextPreparation
 
 
 class KNNMethod:
+    X_train = None
+    X_test = None
+    y_train = None
+    y_test = None
+
+    def __init__(self, X_train, X_test, y_train, y_test):
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
 
     def do_knn(self):
         # Training
-        x, y = TextPreparation.get_dataset()
-        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
-        knn = KNeighborsClassifier(n_neighbors=20).fit(X_train, y_train)
+        # x, y = TextPreparation.get_dataset()
+        # X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=self.test_size)
+        knn = KNeighborsClassifier(n_neighbors=5, algorithm="auto").fit(self.X_train, self.y_train)
 
         # Prediction
-        y_pred = knn.predict(X_test)
-        knn_accuracy = accuracy_score(y_test, y_pred)
+        y_pred = knn.predict(self.X_test)
+        knn_accuracy = accuracy_score(self.y_test, y_pred)
 
         print("Y PREd: {}".format(y_pred))
-        print("Y TEST: {}".format(y_test))
+        print("Y TEST: {}".format(self.y_test))
         print("knn_accuracy: {}".format(knn_accuracy))
