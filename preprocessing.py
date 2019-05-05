@@ -8,6 +8,7 @@ import io
 import os
 import pandas as pd
 from random import shuffle
+from keras.preprocessing.text import Tokenizer
 
 
 class TextPreparation:
@@ -77,7 +78,7 @@ class TextPreparation:
                     for file in files:
                         with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
                             for line in infile:
-                                outfile.write(line)
+                                outfile.write(self.delete_stop_words(line))
 
         return res_path
 
@@ -119,10 +120,9 @@ class TextPreparation:
         author_mark = 0
         for author in authors:
             files = self.get_all_authors_files(author=author)
-            # for file in files:
-            self.create_dictionary(file_name=files[0], author=author, author_mark=author_mark, blocks_size=blocks_size)
-                # self.create_dictionary(file_name=file, author=author, author_mark=int(bin(author_mark)[2:]),
-                #                        blocks_size=blocks_size)
+            for file in files:
+                # self.create_dictionary(file_name=files[1], author=author, author_mark=author_mark, blocks_size=blocks_size)
+                self.create_dictionary(file_name=file, author=author, author_mark=author_mark, blocks_size=blocks_size)
 
             author_mark = author_mark + 1
 
@@ -143,3 +143,55 @@ class TextPreparation:
         print("*****************************")
 
         return x, y
+
+    def get_dataset_for_neural(self, blocks_size=100):
+        res_path = self.merge_all_data_files()
+        with io.open(res_path, 'r', encoding='utf8') as f:
+            data = f.read().splitlines()
+
+        tokenizer = Tokenizer(num_words=None,
+                              filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n',
+                              lower=True,
+                              split=' ',
+                              char_level=False,
+                              oov_token=None,
+                              document_count=0)
+
+        tokenizer.fit_on_texts(texts=data)
+
+        authors = self.get_all_authors()
+        author_mark = 0
+        result = []
+        authors_list = []
+        for author in authors:
+            files = self.get_all_authors_files(author=author)
+            for file in files:
+                data_path = os.path.join(os.getcwd(), "data", author, file)
+
+                with io.open(data_path, 'r', encoding='utf8') as f:
+                    data = f.read().splitlines()
+
+                clear_text = self.delete_stop_words(''.join(data))
+                blocks = self.create_blocks(clear_text, blocks_size)
+
+                result = tokenizer.texts_to_sequences(blocks)
+                authors_list.append(author_mark)
+
+                with open("train.csv", "a") as file:
+                    wr = csv.writer(file)
+                    wr.writerows(result)
+
+            author_mark = author_mark + 1
+
+        # # dataset = result.tolist()
+        # x = []
+        # y = []
+        # for row in dataset:
+        #     x.append(row[:-1])
+        #     y.append(row[-1])
+        #
+        # print("*****************************")
+        # print("LEN X: {}".format(len(x)))
+        # print("*****************************")
+
+        return result, authors_list
