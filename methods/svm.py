@@ -22,10 +22,12 @@ class SVMMethod:
         # Training
         # x, y = TextPreparation.get_dataset()
         # X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=self.text_size, random_state=42)
-        svm = SVC(kernel='linear', C=1, probability=True).fit(self.X_train, self.y_train)
+        # svm = SVC(kernel='linear', C=1, probability=True).fit(self.X_train, self.y_train)
+        clf = SVC(gamma='auto')
+        clf.fit(self.X_train, self.y_train)
 
         # Prediction
-        y_pred = svm.predict(self.X_test)
+        y_pred = clf.predict(self.X_test)
         svm_accuracy = accuracy_score(self.y_test, y_pred)
 
         print("Y PREd: {}".format(y_pred))
