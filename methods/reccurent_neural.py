@@ -37,7 +37,7 @@ class ReccurentNeuralMethod:
 
         model = models.Sequential()
         # Input - Layer
-        model.add(layers.Dense(50, activation="relu", input_shape=(500,)))
+        model.add(layers.Dense(50, activation="relu", input_shape=(200,)))
         # Hidden - Layers
         model.add(layers.Dropout(0.3, noise_shape=None, seed=None))
         model.add(layers.Dense(50, activation="relu"))

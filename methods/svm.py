@@ -33,7 +33,7 @@ class SVMMethod:
         svm_accuracy = accuracy_score(self.y_test, y_pred)
 
         # Cross validation
-        cross_validation = cross_val_score(clf, self.X_train, self.y_train, cv=10)
+        cross_validation = cross_val_score(clf, self.X_train, self.y_train, cv=8)
 
         print("Y PREd: {}".format(y_pred))
         print("Y TEST: {}".format(self.y_test))
