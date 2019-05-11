@@ -1,13 +1,10 @@
 from sklearn.model_selection import train_test_split
-from sklearn.svm import LinearSVC
+from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
 from preprocessing import TextPreparation
 from sklearn.multiclass import OneVsRestClassifier
 
-
-# NEED TO BE COMPLITED!!!
-
-class SVMMethod:
+class SKlearnNeural:
     X_train = None
     X_test = None
     y_train = None
@@ -21,10 +18,7 @@ class SVMMethod:
 
     def do_SVM(self):
         # Training
-        # x, y = TextPreparation.get_dataset()
-        # X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=self.text_size, random_state=42)
-        # svm = SVC(kernel='linear', C=1, probability=True).fit(self.X_train, self.y_train)
-        clf = OneVsRestClassifier(LinearSVC(multi_class="ovr"))
+        clf = MLPClassifier()
         clf.fit(self.X_train, self.y_train)
 
         # Prediction
@@ -34,4 +28,5 @@ class SVMMethod:
         print("Y PREd: {}".format(y_pred))
         print("Y TEST: {}".format(self.y_test))
         print("svm_accuracy: {}".format(svm_accuracy))
+
         # print("RES: {}".format(res))

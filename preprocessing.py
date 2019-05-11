@@ -15,7 +15,8 @@ import numpy as np
 class TextPreparation:
 
     def __init__(self):
-        self.vectorizer = CountVectorizer(max_features=600)
+        # self.vectorizer = CountVectorizer(max_features=500)
+        self.vectorizer = CountVectorizer(ngram_range=(2, 2), analyzer='word', max_features=500)
         self.tokenizer = Tokenizer()
         # self.define_dictionary()
 
@@ -254,6 +255,7 @@ class TextPreparation:
             all_data = f.read().splitlines()
 
         self.vectorizer.fit_transform(raw_documents=all_data)
+        print(self.vectorizer.get_feature_names())
 
         authors = self.get_all_authors()
         author_mark = 0
@@ -322,7 +324,7 @@ class TextPreparation:
 
         authors = self.get_all_authors()
         author_mark = 0
-        for author in authors:
+        for author in authors[:2]:
             files = self.get_all_authors_files(author=author)
             for file in files:
                 # self.add_file_to_train(file_name=files[1], author_mark=author_mark, blocks_size=blocks_size)

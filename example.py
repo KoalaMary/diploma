@@ -5,6 +5,7 @@ from methods.svm import SVMMethod
 from methods.knn import KNNMethod
 from methods.naive_bayes import NaiveBayesMethod
 from methods.reccurent_neural import ReccurentNeuralMethod
+from methods.sklearn_neural import SKlearnNeural
 from sklearn.model_selection import train_test_split
 import datetime
 import numpy as np
@@ -42,7 +43,7 @@ for solver in lr_solvers:
 print("-----------------RANDOM FORESTS------------------------")
 rf = RandomForestMethod(X_train, X_test, y_train, y_test)
 rf.do_RF()
-#
+
 print("-----------------SVM METHOD------------------------")
 svm = SVMMethod(np.array(X_train), np.array(X_test), np.array(y_train), np.array(y_test))
 svm.do_SVM()
@@ -55,7 +56,11 @@ print("-----------------NAIVE BAYES------------------------")
 bayes = NaiveBayesMethod(X_train, X_test, y_train, y_test)
 bayes.do_bayes()
 
-print("-----------------RECURRENT NEURAL------------------------")
+print("-----------------SKLEARN NEURAL------------------------")
+bayes = SKlearnNeural(X_train, X_test, y_train, y_test)
+bayes.do_SVM()
+
+# print("-----------------RECURRENT NEURAL------------------------")
 recurent_neural = ReccurentNeuralMethod(np.array(X_train).astype("float32"), np.array(X_test).astype("float32"),
                                         np.array(y_train).astype("float32"), np.array(y_test).astype("float32"))
 # recurent_neural = ReccurentNeuralMethod()
