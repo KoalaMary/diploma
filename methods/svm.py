@@ -3,6 +3,7 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 from preprocessing import TextPreparation
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.model_selection import cross_val_score
 
 
 # NEED TO BE COMPLITED!!!
@@ -31,7 +32,11 @@ class SVMMethod:
         y_pred = clf.predict(self.X_test)
         svm_accuracy = accuracy_score(self.y_test, y_pred)
 
+        # Cross validation
+        cross_validation = cross_val_score(clf, self.X_train, self.y_train, cv=10)
+
         print("Y PREd: {}".format(y_pred))
         print("Y TEST: {}".format(self.y_test))
         print("svm_accuracy: {}".format(svm_accuracy))
+        print("Cross validation: {}".format(cross_validation))
         # print("RES: {}".format(res))
