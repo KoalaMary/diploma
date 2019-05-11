@@ -15,9 +15,9 @@ import numpy as np
 class TextPreparation:
 
     def __init__(self, max_features=500):
-        # self.vectorizer = CountVectorizer(max_features=500)
-        self.vectorizer = CountVectorizer(ngram_range=(2, 2), analyzer='char', max_features=max_features)
-        self.tokenizer = Tokenizer()
+        self.vectorizer = CountVectorizer(max_features=max_features)
+        # self.vectorizer = CountVectorizer(ngram_range=(2, 2), analyzer='char', max_features=max_features)
+        # self.tokenizer = Tokenizer()
 
     @staticmethod
     def delete_punctuation(text):
@@ -70,7 +70,7 @@ class TextPreparation:
 
     ################# NEW PREPARATION#########################
 
-    def prepare_all_files(self):
+    def prepare_all_files(self, authors_number=6, files_number=4, file_length=15000):
         all_res_path = os.path.join(os.getcwd(), "all_data.txt")
         res_path = os.path.join(os.getcwd(), "prepared_texts")
 
@@ -78,45 +78,49 @@ class TextPreparation:
         data_path = os.path.join(os.getcwd(), "data")
 
         with io.open(all_res_path, 'w', encoding='utf8') as outfile_all:
-            for author in authors:
+            for author in authors[:authors_number]:
                 files = self.get_all_authors_files(author=author)
-                for file in files:
+                for file in files[:files_number]:
                     print("Started file: {}".format(file))
                     prepared_text = None
                     with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
                         data = infile.read()
-                        prepared_text = self.prepare_text(data)
+                        prepared_text = self.prepare_text(data[:file_length])
                     with io.open(res_path + "/" + file, 'w', encoding='utf8') as outfile:
                         outfile.write(prepared_text)
                     outfile_all.write(prepared_text)
                     print("Finished file: {}".format(file))
 
-    def add_file_to_train(self, file_name, author_mark, blocks_size):
+    def add_file_to_train(self, file_name=None, author_mark=None, blocks_size=None):
         data_path = os.path.join(os.getcwd(), "prepared_texts", file_name)
 
         with io.open(data_path, 'r', encoding='utf8') as f:
             data = f.read()
 
-        blocks = self.create_blocks(data, blocks_size)
-
-        x = []
-        y = []
         result = []
 
-        for block in blocks:
-            vector = self.vectorizer.transform(block)
-            temp = vector.toarray()[0]
-            temp = temp.tolist()
-            temp.append(author_mark)
+        if blocks_size is not None:
+            blocks = self.create_blocks(data, blocks_size)
 
-            result.append(temp)
+            for block in blocks:
+                vector = self.vectorizer.transform(block)
+                temp = vector.toarray()[0]
+                temp = temp.tolist()
+                temp.append(author_mark)
+
+                result.append(temp)
+        else:
+            vector = self.vectorizer.transform([data]).toarray()[0].tolist()
+            vector.append(author_mark)
+
+            result.append(vector)
 
         with open("train.csv", "a") as file:
             wr = csv.writer(file)
             wr.writerows(result)
         file.close()
 
-    def create_train(self, blocks_size=100):
+    def create_train(self, blocks_size=None, authors_number=6, files_number=4,):
         all_data_path = os.path.join(os.getcwd(), "all_data.txt")
         with io.open(all_data_path, 'r', encoding='utf8') as f:
             all_data = f.read().splitlines()
@@ -126,9 +130,9 @@ class TextPreparation:
 
         authors = self.get_all_authors()
         author_mark = 0
-        for author in authors:
+        for author in authors[:authors_number]:
             files = self.get_all_authors_files(author=author)
-            for file in files:
+            for file in files[:files_number]:
                 # self.add_file_to_train(file_name=files[1], author_mark=author_mark, blocks_size=blocks_size)
                 self.add_file_to_train(file_name=file, author_mark=author_mark, blocks_size=blocks_size)
 

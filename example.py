@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import train_test_split
 import datetime
 import numpy as np
+from sklearn.preprocessing import scale
 
 
 def divide_dataset(test_size):
@@ -24,7 +25,15 @@ def prepare_text(blocks_size=100, max_features=500):
     # ex.prepare_all_files()
     # ex.create_train_keras()
     # ex.get_dataset_keras()
-    ex.create_train(blocks_size=blocks_size)
+    ex.create_train()
+    # ex.create_all_dicts(blocks_size=blocks_size)
+
+def prepare_text2(max_features=500):
+    ex = TextPreparation(max_features=max_features)
+    ex.prepare_all_files(authors_number=3, files_number=4, file_length=20000)
+    # ex.create_train_keras()
+    # ex.get_dataset_keras()
+    ex.create_train(authors_number=3, files_number=4)
     # ex.create_all_dicts(blocks_size=blocks_size)
 
 def logistic_regression(X_train, X_test, y_train, y_test):
@@ -82,20 +91,32 @@ def voiting_classifier(X_train, X_test, y_train, y_test):
 
 
 #***************************************************************************
-test_size = 0.3
-blocks_size = 100
+test_size = 0.25
+blocks_size = 200
+max_features = 500
 start_time = datetime.datetime.now()
 
-prepare_text(blocks_size, max_features=700)
+prepare_text(max_features=max_features)
+# prepare_text2(blocks_size)
+# X_train, X_test, y_train, y_test = TextPreparation.get_dataset_new()
 X_train, X_test, y_train, y_test = divide_dataset(test_size=test_size)
 
-# logistic_regression(X_train, X_test, y_train, y_test)
+logistic_regression(X_train, X_test, y_train, y_test)
 # random_forests(X_train, X_test, y_train, y_test)
-# svm(X_train, X_test, y_train, y_test)
-# knn(X_train, X_test, y_train, y_test)
-# naive_bayes(X_train, X_test, y_train, y_test)
+svm(X_train, X_test, y_train, y_test)
+knn(X_train, X_test, y_train, y_test)
+naive_bayes(scale(X_train), scale(X_test), y_train, y_test)
 # skleran_neural(X_train, X_test, y_train, y_test)
 # reccurent_neural(X_train, X_test, y_train, y_test)
+
+
+
+
+
+
+
+
+
 voiting_classifier(X_train, X_test, y_train, y_test)
 
 
