@@ -30,10 +30,13 @@ def get_all_authors_files(author):
     return os.listdir(path)
 
 
-def tokenize_text(text):
-    tokenizer = nltk.data.load('tokenizers/punkt/russian.pickle')
-    text = text.replace("\n", "").replace("-", "")
-    return tokenizer.tokenize(text)
+def tokenize_text(text, blocks_size=100):
+    # tokenizer = nltk.data.load('tokenizers/punkt/russian.pickle')
+    # text = text.replace("\n", "").replace("-", "")
+    # return tokenizer.tokenize(text)
+    text = text.split()
+    text2 = [text[x:x + blocks_size] for x in range(0, len(text), blocks_size)]
+    return text2
 
 
 def text_process(tex):
@@ -50,6 +53,24 @@ def text_process(tex):
     # 3. Removal of Stopwords
     return [word for word in a.split() if word.lower() not
             in stopwords.words('russian')]
+
+def word_cloud_visualization(df_train):
+    X = df_train['text']
+    wordcloud1 = WordCloud().generate(X[0])  # for EAP
+    wordcloud2 = WordCloud().generate(X[1])  # for HPL
+    wordcloud3 = WordCloud().generate(X[3])  # for MWS
+    print(X[0])
+    print(df_train['author'][0])
+    plt.imshow(wordcloud1, interpolation='bilinear')
+    plt.show()
+    print(X[1])
+    print(df_train['author'][1])
+    plt.imshow(wordcloud2, interpolation='bilinear')
+    plt.show()
+    print(X[3])
+    print(df_train['author'][3])
+    plt.imshow(wordcloud3, interpolation='bilinear')
+    plt.show()
 
 
 def prepare_text(author=None, data=None):
@@ -88,7 +109,7 @@ def make_dataset():
     train_res = []
     test_res = []
 
-    for author in authors[:2]:
+    for author in authors:
         files = get_all_authors_files(author=author)
         for file in files:
             print("Started file: {}".format(file))
