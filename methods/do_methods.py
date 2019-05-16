@@ -29,8 +29,8 @@ def random_forests(X_train, X_test, y_train, y_test):
 
 def svm(X_train, X_test, y_train, y_test):
     print("-----------------SVM METHOD------------------------")
-    svm = SVMMethod(np.array(X_train), np.array(X_test), np.array(y_train), np.array(y_test))
-    svm.do_SVM()
+    svm = SVMMethod(X_train, X_test, y_train, y_test)
+    return svm.do_SVM()
 
 
 def knn(X_train, X_test, y_train, y_test):

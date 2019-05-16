@@ -25,7 +25,7 @@ class SVMMethod:
         # x, y = TextPreparation.get_dataset()
         # X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=self.text_size, random_state=42)
         # svm = SVC(kernel='linear', C=1, probability=True).fit(self.X_train, self.y_train)
-        clf = OneVsRestClassifier(LinearSVC(multi_class="ovr"))
+        clf = OneVsRestClassifier(LinearSVC(multi_class="ovr", max_iter=5000))
         clf.fit(self.X_train, self.y_train)
 
         # Prediction
@@ -40,3 +40,5 @@ class SVMMethod:
         print("svm_accuracy: {}".format(svm_accuracy))
         print("Cross validation: {}".format(cross_validation))
         # print("RES: {}".format(res))
+
+        return y_pred

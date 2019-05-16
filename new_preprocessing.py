@@ -18,6 +18,7 @@ import itertools
 import matplotlib.pyplot as plt
 import io
 import os
+import csv
 
 
 def get_all_authors():
@@ -54,6 +55,7 @@ def text_process(tex):
     return [word for word in a.split() if word.lower() not
             in stopwords.words('russian')]
 
+
 def word_cloud_visualization(df_train):
     X = df_train['text']
     wordcloud1 = WordCloud().generate(X[0])  # for EAP
@@ -74,11 +76,6 @@ def word_cloud_visualization(df_train):
 
 
 def prepare_text(author=None, data=None):
-    # text_column = "text"
-    # author_column = "author"
-    # train_file = os.path.join(os.getcwd(), "my_train.csv")
-    # test_file = os.path.join(os.getcwd(), "my_test.csv")
-
     sentences = tokenize_text(data)
     train_sentences = sentences[:int(len(sentences) * 0.75)]
     test_sentences = sentences[int(len(sentences) * 0.75):]
@@ -87,15 +84,8 @@ def prepare_text(author=None, data=None):
 
     return train_sentences, test_sentences, train_res, test_res
 
-    # train_content = {text_column: train_sentences, author_column: [author] * len(train_sentences)}
-    # test_content = {text_column: test_sentences, author_column: [author] * len(test_sentences)}
-    # train_df = pd.DataFrame(data=train_content)
-    # test_df = pd.DataFrame(data=test_content)
-    # train_df.to_csv(train_file, mode="a")
-    # test_df.to_csv(test_file, mode="a")
 
-
-def make_dataset():
+def make_data():
     authors = get_all_authors()
     data_path = os.path.join(os.getcwd(), "data")
 
@@ -109,9 +99,9 @@ def make_dataset():
     train_res = []
     test_res = []
 
-    for author in authors:
+    for author in authors[:2]:
         files = get_all_authors_files(author=author)
-        for file in files:
+        for file in files[:1]:
             print("Started file: {}".format(file))
             with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
                 data = infile.read()
@@ -130,7 +120,12 @@ def make_dataset():
     test_df.to_csv(test_file, mode="a")
 
 
-def get_dataset():
+def make_dataset(max_features=1000):
+    train_file = os.path.join(os.getcwd(), "train_dataset.csv")
+    test_file = os.path.join(os.getcwd(), "test_dataset.csv")
+    train_res_file = os.path.join(os.getcwd(), "train_res.csv")
+    test_res_file = os.path.join(os.getcwd(), "test_res.csv")
+
     def text_process(tex):
         # 1. Removal of Punctuation Marks
         lemmatiser = WordNetLemmatizer()
@@ -150,20 +145,62 @@ def get_dataset():
     df_test = pd.read_csv('my_test.csv')
 
     X_tr = df_train['text']
-    y_train = df_train['author']
+    y_tr = df_train['author']
     X_te = df_test['text']
-    y_test = df_test['author']
+    y_te = df_test['author']
     labelencoder = LabelEncoder()
-    y_train = labelencoder.fit_transform(y_train)
-    y_test = labelencoder.transform(y_test)
+    y_train = labelencoder.fit_transform(y_tr)
+    y_test = labelencoder.transform(y_te)
 
-    # 80-20 splitting the dataset (80%->Training and 20%->Validation)
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
-    # defining the bag-of-words transformer on the text-processed corpus # i.e., text_process() declared in II is executed...
-    bow_transformer = CountVectorizer(analyzer=text_process).fit(X_tr)
-    # transforming into Bag-of-Words and hence textual data to numeric..
-    X_train = bow_transformer.transform(X_tr)  # ONLY TRAINING DATA
-    # transforming into Bag-of-Words and hence textual data to numeric..
-    X_test = bow_transformer.transform(X_te)  # TEST DATA
+    bow_transformer = CountVectorizer(analyzer=text_process, max_features=max_features).fit(X_tr)
+    a = bow_transformer.vocabulary
+    X_train = bow_transformer.transform(X_tr).toarray()
+    X_test = bow_transformer.transform(X_te).toarray()
+
+    with open("train_dataset.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerows(X_train)
+    file.close()
+
+    with open("test_dataset.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerows(X_test)
+    file.close()
+
+    with open("train_res.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerows(y_train)
+    file.close()
+
+    with open("test_res.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerows(y_test)
+    file.close()
+
+    # train_df = pd.DataFrame(data=X_train)
+    # test_df = pd.DataFrame(data=X_test)
+    # train_res_df = pd.DataFrame(data=y_train)
+    # test_res_df = pd.DataFrame(data=y_test)
+    # train_df.to_csv(train_file, mode="a")
+    # test_df.to_csv(test_file, mode="a")
+    # train_res_df.to_csv(train_res_file, mode="a")
+    # test_res_df.to_csv(test_res_file, mode="a")
+
+
+def get_dataset():
+    train_file = os.path.join(os.getcwd(), "train_dataset.csv")
+    test_file = os.path.join(os.getcwd(), "test_dataset.csv")
+    train_res_file = os.path.join(os.getcwd(), "train_res.csv")
+    test_res_file = os.path.join(os.getcwd(), "test_res.csv")
+
+    X_train = pd.read_csv(train_file).values.tolist()
+    X_test = pd.read_csv(test_file).values.tolist()
+    y_train = pd.read_csv(train_res_file)
+    y_test = pd.read_csv(test_res_file).values.tolist()
+
+    # X_train = df_train['text']
+    # y_train = df_train_res['author']
+    # X_test = df_test['text']
+    # y_test = df_test_res['author']
 
     return X_train, X_test, y_train, y_test
