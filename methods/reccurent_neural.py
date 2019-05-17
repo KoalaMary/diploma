@@ -37,7 +37,7 @@ class ReccurentNeuralMethod:
 
         model = models.Sequential()
         # Input - Layer
-        model.add(layers.Dense(50, activation="relu", input_shape=(500,)))
+        model.add(layers.Dense(50, activation="relu", input_shape=(1000,)))
         # Hidden - Layers
         model.add(layers.Dropout(0.3, noise_shape=None, seed=None))
         model.add(layers.Dense(50, activation="relu"))
@@ -96,7 +96,8 @@ class ReccurentNeuralMethod:
         results = model.fit(
             self.X_train, self.y_train,
             epochs=2,
-            batch_size=32,
+            batch_size=500,
             validation_data=(self.X_test, self.y_test)
         )
         print("Test-Accuracy:", np.mean(results.history["val_acc"]))
+

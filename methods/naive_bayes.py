@@ -31,3 +31,5 @@ class NaiveBayesMethod:
         print("Y TEST: {}".format(self.y_test))
         # print("Y TRAIN: {}".format(y_train))
         print("RES: {}".format(res))
+
+        return y_pred

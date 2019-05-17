@@ -51,9 +51,11 @@ class VoitingClassifierMethod:
         # y_pred2 = eclf2.predict(self.X_test)
         # print("ACCURANCY 2: {}".format(accuracy_score(self.y_test, y_pred2)))
 
-        eclf3 = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('gnb', clf3)], flatten_transform=True)
+        eclf3 = VotingClassifier(estimators=[('lr', clf1), ('gnb', clf3)], flatten_transform=True)
         eclf3 = eclf3.fit(self.X_train, self.y_train)
         y_pred3 = eclf3.predict(self.X_test)
         # cross_validation = cross_val_score(eclf3, self.X_train, self.y_train, cv=10)
         print("ACCURANCY 3: {}".format(accuracy_score(self.y_test, y_pred3)))
         # print("Cross validation: {}".format(cross_validation))
+
+        return y_pred3

@@ -1,23 +1,14 @@
 import pandas as pd
 import string
-import nltk
 from nltk.corpus import stopwords
-import nltk.data
 from nltk.stem import WordNetLemmatizer
 from sklearn.preprocessing import LabelEncoder
-from PIL import Image
 from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-import numpy as np
-import itertools
 import matplotlib.pyplot as plt
 import io
 import os
+import csv
 
 
 def get_all_authors():
@@ -54,6 +45,7 @@ def text_process(tex):
     return [word for word in a.split() if word.lower() not
             in stopwords.words('russian')]
 
+
 def word_cloud_visualization(df_train):
     X = df_train['text']
     wordcloud1 = WordCloud().generate(X[0])  # for EAP
@@ -74,11 +66,6 @@ def word_cloud_visualization(df_train):
 
 
 def prepare_text(author=None, data=None):
-    # text_column = "text"
-    # author_column = "author"
-    # train_file = os.path.join(os.getcwd(), "my_train.csv")
-    # test_file = os.path.join(os.getcwd(), "my_test.csv")
-
     sentences = tokenize_text(data)
     train_sentences = sentences[:int(len(sentences) * 0.75)]
     test_sentences = sentences[int(len(sentences) * 0.75):]
@@ -87,15 +74,8 @@ def prepare_text(author=None, data=None):
 
     return train_sentences, test_sentences, train_res, test_res
 
-    # train_content = {text_column: train_sentences, author_column: [author] * len(train_sentences)}
-    # test_content = {text_column: test_sentences, author_column: [author] * len(test_sentences)}
-    # train_df = pd.DataFrame(data=train_content)
-    # test_df = pd.DataFrame(data=test_content)
-    # train_df.to_csv(train_file, mode="a")
-    # test_df.to_csv(test_file, mode="a")
 
-
-def make_dataset():
+def prepare_all_data():
     authors = get_all_authors()
     data_path = os.path.join(os.getcwd(), "data")
 
@@ -130,7 +110,7 @@ def make_dataset():
     test_df.to_csv(test_file, mode="a")
 
 
-def get_dataset():
+def make_dataset(max_features=500, folder="text_process"):
     def text_process(tex):
         # 1. Removal of Punctuation Marks
         lemmatiser = WordNetLemmatizer()
@@ -157,13 +137,41 @@ def get_dataset():
     y_train = labelencoder.fit_transform(y_train)
     y_test = labelencoder.transform(y_test)
 
-    # 80-20 splitting the dataset (80%->Training and 20%->Validation)
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
-    # defining the bag-of-words transformer on the text-processed corpus # i.e., text_process() declared in II is executed...
-    bow_transformer = CountVectorizer(analyzer=text_process).fit(X_tr)
-    # transforming into Bag-of-Words and hence textual data to numeric..
-    X_train = bow_transformer.transform(X_tr)  # ONLY TRAINING DATA
-    # transforming into Bag-of-Words and hence textual data to numeric..
-    X_test = bow_transformer.transform(X_te)  # TEST DATA
+    bow_transformer = CountVectorizer(analyzer="char", ngram_range=(3, 3), max_features=max_features).fit(X_tr)
+
+    X_train = bow_transformer.transform(X_tr).toarray()
+    X_test = bow_transformer.transform(X_te).toarray()
+
+    path = os.path.join(os.getcwd(), "datasets", folder)
+
+    with open(path + "/" + "train_dataset.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerows(X_train)
+    file.close()
+
+    with open(path + "/" + "test_dataset.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerows(X_test)
+    file.close()
+
+    with open(path + "/" + "train_res.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerow(y_train)
+    file.close()
+
+    with open(path + "/" + "test_res.csv", "a") as file:
+        wr = csv.writer(file)
+        wr.writerow(y_test)
+    file.close()
+
+    return X_train, X_test, y_train, y_test
+
+
+def get_dataset(folder="text_process"):
+    path = os.path.join(os.getcwd(), "datasets", folder) + "/"
+    X_train = pd.read_csv(path + "train_dataset.csv", header=None).values
+    X_test = pd.read_csv(path + "test_dataset.csv", header=None).values
+    y_train = pd.read_csv(path + "train_res.csv", header=None).values.tolist()[0]
+    y_test = pd.read_csv(path + "test_res.csv", header=None).values.tolist()[0]
 
     return X_train, X_test, y_train, y_test

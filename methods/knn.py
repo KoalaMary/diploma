@@ -29,3 +29,5 @@ class KNNMethod:
         print("Y PREd: {}".format(y_pred))
         print("Y TEST: {}".format(self.y_test))
         print("knn_accuracy: {}".format(knn_accuracy))
+
+        return y_pred

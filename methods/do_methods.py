@@ -18,50 +18,48 @@ def logistic_regression(X_train, X_test, y_train, y_test):
         #                               np.array(y_train).astype("float32"), np.array(y_test).astype("float32"),
         #                               solver=solver)
         lr = LogisticRegressionMethod(X_train, X_test, y_train, y_test)
-        lr.do_LR()
+        return lr.do_LR()
 
 
 def random_forests(X_train, X_test, y_train, y_test):
     print("-----------------RANDOM FORESTS------------------------")
     rf = RandomForestMethod(X_train, X_test, y_train, y_test)
-    rf.do_RF()
+    return rf.do_RF()
 
 
 def svm(X_train, X_test, y_train, y_test):
     print("-----------------SVM METHOD------------------------")
-    svm = SVMMethod(np.array(X_train), np.array(X_test), np.array(y_train), np.array(y_test))
-    svm.do_SVM()
+    svm = SVMMethod(X_train, X_test, y_train, y_test)
+    return svm.do_SVM()
 
 
 def knn(X_train, X_test, y_train, y_test):
     print("-----------------KNN------------------------")
     knn = KNNMethod(X_train, X_test, y_train, y_test)
-    knn.do_knn()
+    return knn.do_knn()
 
 
 def naive_bayes(X_train, X_test, y_train, y_test):
     print("-----------------NAIVE BAYES------------------------")
     bayes = NaiveBayesMethod(X_train, X_test, y_train, y_test)
-    bayes.do_bayes()
+    return bayes.do_bayes()
 
 
 def skleran_neural(X_train, X_test, y_train, y_test):
     print("-----------------SKLEARN NEURAL------------------------")
     bayes = SKlearnNeural(X_train, X_test, y_train, y_test)
-    bayes.do_SVM()
+    return bayes.do_SVM()
 
 
 def reccurent_neural(X_train, X_test, y_train, y_test):
     # print("-----------------RECURRENT NEURAL------------------------")
-    recurent_neural = ReccurentNeuralMethod(np.array(X_train).astype("float32"), np.array(X_test).astype("float32"),
-                                            np.array(y_train).astype("float32"), np.array(y_test).astype("float32"))
+    recurent_neural = ReccurentNeuralMethod(X_train, X_test, y_train, y_test)
     # recurent_neural = ReccurentNeuralMethod()
-    recurent_neural.do_rc()
+    return recurent_neural.do_rc()
 
 
 def voiting_classifier(X_train, X_test, y_train, y_test):
     # print("-----------------VOITING CLASSIFIER------------------------")
-    voiting = VoitingClassifierMethod(np.array(X_train).astype("float32"), np.array(X_test).astype("float32"),
-                                      np.array(y_train).astype("float32"), np.array(y_test).astype("float32"))
+    voiting = VoitingClassifierMethod(X_train, X_test, y_train, y_test)
     # recurent_neural = ReccurentNeuralMethod()
-    voiting.do_voiting()
+    return voiting.do_voiting()
