@@ -10,6 +10,12 @@ import io
 import os
 import csv
 import nltk
+import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from pymystem3 import Mystem
+from nltk.stem import PorterStemmer
+from nltk.tokenize import sent_tokenize, word_tokenize
 
 
 def get_all_authors():
@@ -47,33 +53,58 @@ def text_process(tex):
             in stopwords.words('russian')]
 
 
-def word_cloud_visualization(df_train):
-    X = df_train['text']
-    wordcloud1 = WordCloud().generate(X[0])  # for EAP
-    wordcloud2 = WordCloud().generate(X[1])  # for HPL
-    wordcloud3 = WordCloud().generate(X[3])  # for MWS
-    print(X[0])
-    print(df_train['author'][0])
-    plt.imshow(wordcloud1, interpolation='bilinear')
-    plt.show()
-    print(X[1])
-    print(df_train['author'][1])
-    plt.imshow(wordcloud2, interpolation='bilinear')
-    plt.show()
-    print(X[3])
-    print(df_train['author'][3])
-    plt.imshow(wordcloud3, interpolation='bilinear')
-    plt.show()
+# def word_cloud_visualization(df_train):
+#     X = df_train['text']
+#     wordcloud1 = WordCloud().generate(X[0])  # for EAP
+#     wordcloud2 = WordCloud().generate(X[1])  # for HPL
+#     wordcloud3 = WordCloud().generate(X[3])  # for MWS
+#     print(X[0])
+#     print(df_train['author'][0])
+#     plt.imshow(wordcloud1, interpolation='bilinear')
+#     plt.show()
+#     print(X[1])
+#     print(df_train['author'][1])
+#     plt.imshow(wordcloud2, interpolation='bilinear')
+#     plt.show()
+#     print(X[3])
+#     print(df_train['author'][3])
+#     plt.imshow(wordcloud3, interpolation='bilinear')
+#     plt.show()
 
 
 def prepare_text(author=None, data=None):
-    sentences = tokenize_text(data)
-    train_sentences = sentences[:int(len(sentences) * 0.75)]
-    test_sentences = sentences[int(len(sentences) * 0.75):]
-    train_res = [author] * len(train_sentences)
-    test_res = [author] * len(test_sentences)
+    # sentences = tokenize_text(data)
+    # train_sentences = sentences[:int(len(sentences) * 0.75)]
+    # test_sentences = sentences[int(len(sentences) * 0.75):]
+    # train_res = [author] * len(train_sentences)
+    # test_res = [author] * len(test_sentences)
+    #
+    # return train_sentences, test_sentences, train_res, test_res
 
-    return train_sentences, test_sentences, train_res, test_res
+    text = data.replace("\n", " ")
+    text = re.sub("[^а-яА-Я\-\s]", "", text)
+    text = re.sub("[\-]", " ", text.lower())
+
+    stop_words = set(stopwords.words("russian"))
+    words = word_tokenize(text=text, language="russian", preserve_line=True)
+    words_filtered = []
+
+    for w in words:
+        if w not in stop_words:
+            words_filtered.append(w)
+    text = ' '.join(words_filtered)
+
+    m = Mystem()
+    m.start()
+    lemmas = m.lemmatize(str(text))
+    text = ''.join(lemmas)
+    #
+    # ps = PorterStemmer()
+    # # for word in text:
+    # text2 = ps.stem(text)
+
+
+    return ''.join(text)
 
 
 def prepare_all_data():
@@ -92,21 +123,23 @@ def prepare_all_data():
 
     for author in authors:
         files = get_all_authors_files(author=author)
-        for file in files[:2]:
+        for file in files[:3]:
             print("Started train file: {}".format(file))
             with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
                 data = infile.read()
             # train_sentences_au, test_sentence_au, train_res_au, test_res_au = prepare_text(author=author, data=data)
-            train_sentences.append(data)
+            text = prepare_text(data=data)
+            train_sentences.append(text)
             # test_sentences += test_sentence_au
             train_res.append(author)
             # test_res += test_res_au
             print("Finished train file: {}".format(file))
-        for file in files[2:]:
+        for file in files[3:]:
             print("Started test file: {}".format(file))
             with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
                 data = infile.read()
             # train_sentences_au, test_sentence_au, train_res_au, test_res_au = prepare_text(author=author, data=data)
+            data = prepare_text(data=data)
             test_sentences.append(data)
             # test_sentences += test_sentence_au
             test_res.append(author)
