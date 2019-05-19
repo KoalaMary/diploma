@@ -3,12 +3,13 @@ import string
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.preprocessing import LabelEncoder
-from wordcloud import WordCloud
+# from wordcloud import WordCloud
 from sklearn.feature_extraction.text import CountVectorizer
 import matplotlib.pyplot as plt
 import io
 import os
 import csv
+import nltk
 
 
 def get_all_authors():
@@ -91,16 +92,26 @@ def prepare_all_data():
 
     for author in authors:
         files = get_all_authors_files(author=author)
-        for file in files:
-            print("Started file: {}".format(file))
+        for file in files[:2]:
+            print("Started train file: {}".format(file))
             with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
                 data = infile.read()
-            train_sentences_au, test_sentence_au, train_res_au, test_res_au = prepare_text(author=author, data=data)
-            train_sentences += train_sentences_au
-            test_sentences += test_sentence_au
-            train_res += train_res_au
-            test_res += test_res_au
-            print("Finished file: {}".format(file))
+            # train_sentences_au, test_sentence_au, train_res_au, test_res_au = prepare_text(author=author, data=data)
+            train_sentences.append(data)
+            # test_sentences += test_sentence_au
+            train_res.append(author)
+            # test_res += test_res_au
+            print("Finished train file: {}".format(file))
+        for file in files[2:]:
+            print("Started test file: {}".format(file))
+            with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
+                data = infile.read()
+            # train_sentences_au, test_sentence_au, train_res_au, test_res_au = prepare_text(author=author, data=data)
+            test_sentences.append(data)
+            # test_sentences += test_sentence_au
+            test_res.append(author)
+            # test_res += test_res_au
+            print("Finished test file: {}".format(file))
 
     train_content = {text_column: train_sentences, author_column: train_res}
     test_content = {text_column: test_sentences, author_column: test_res}
@@ -111,6 +122,8 @@ def prepare_all_data():
 
 
 def make_dataset(max_features=500, folder="text_process"):
+    # nltk.download('wordnet')
+
     def text_process(tex):
         # 1. Removal of Punctuation Marks
         lemmatiser = WordNetLemmatizer()
@@ -137,7 +150,7 @@ def make_dataset(max_features=500, folder="text_process"):
     y_train = labelencoder.fit_transform(y_train)
     y_test = labelencoder.transform(y_test)
 
-    bow_transformer = CountVectorizer(analyzer="char", ngram_range=(3, 3), max_features=max_features).fit(X_tr)
+    bow_transformer = CountVectorizer(analyzer="word", max_features=max_features).fit(X_tr)
 
     X_train = bow_transformer.transform(X_tr).toarray()
     X_test = bow_transformer.transform(X_te).toarray()
