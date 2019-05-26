@@ -38,6 +38,8 @@ class LogisticRegressionMethod:
         print("Y TRAIN: {}".format(self.y_train))
         print("RES: {}".format(res))
 
+        return y_pred
+
         # ROC
         # logistic_accuracy = accuracy_score(y_test, y_pred)
         # metrics_for_forest = precision_recall_fscore_support(y_test, y_pred, average="macro")

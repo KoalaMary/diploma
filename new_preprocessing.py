@@ -21,12 +21,12 @@ import os
 
 
 def get_all_authors():
-    path = os.path.join(os.getcwd(), "data")
+    path = os.path.join(os.getcwd(), "conference_data")
     return os.listdir(path)
 
 
 def get_all_authors_files(author):
-    path = os.path.join(os.getcwd(), "data", author)
+    path = os.path.join(os.getcwd(), "conference_data", author)
     return os.listdir(path)
 
 
@@ -54,6 +54,7 @@ def text_process(tex):
     return [word for word in a.split() if word.lower() not
             in stopwords.words('russian')]
 
+
 def word_cloud_visualization(df_train):
     X = df_train['text']
     wordcloud1 = WordCloud().generate(X[0])  # for EAP
@@ -79,11 +80,12 @@ def prepare_text(author=None, data=None):
     # train_file = os.path.join(os.getcwd(), "my_train.csv")
     # test_file = os.path.join(os.getcwd(), "my_test.csv")
 
-    sentences = tokenize_text(data)
-    train_sentences = sentences[:int(len(sentences) * 0.75)]
-    test_sentences = sentences[int(len(sentences) * 0.75):]
-    train_res = [author] * len(train_sentences)
-    test_res = [author] * len(test_sentences)
+    # sentences = tokenize_text(data)
+    sentences = data.split(" ")
+    train_sentences = " ".join(sentences[:int(len(sentences) * 0.50)])
+    test_sentences = " ".join(sentences[int(len(sentences) * 0.50):])
+    train_res = [author] * 2
+    test_res = [author] * 2
 
     return train_sentences, test_sentences, train_res, test_res
 
@@ -97,7 +99,42 @@ def prepare_text(author=None, data=None):
 
 def make_dataset():
     authors = get_all_authors()
-    data_path = os.path.join(os.getcwd(), "data")
+    data_path = os.path.join(os.getcwd(), "conference_data")
+
+    text_column = "text"
+    author_column = "author"
+    train_file = os.path.join(os.getcwd(), "my_train.csv")
+    test_file = os.path.join(os.getcwd(), "my_test.csv")
+
+    train_sentences = []
+    test_sentences = []
+    train_res = []
+    test_res = []
+
+    for author in authors[:10]:
+        files = get_all_authors_files(author=author)
+        for file in files:
+            print("Started file: {}".format(file))
+            with io.open(data_path + "/" + author + "/" + file, 'r', encoding='cp1251') as infile:
+                data = infile.read()
+            train_sentences_au, test_sentence_au, train_res_au, test_res_au = prepare_text(author=author, data=data)
+            train_sentences.append(train_sentences_au)
+            test_sentences.append(test_sentence_au)
+            train_res.append(train_res_au)
+            test_res.append(test_res_au)
+            print("Finished file: {}".format(file))
+
+    train_content = {text_column: train_sentences, author_column: train_res}
+    test_content = {text_column: test_sentences, author_column: test_res}
+    train_df = pd.DataFrame(data=train_content)
+    test_df = pd.DataFrame(data=test_content)
+    train_df.to_csv(train_file, mode="a")
+    test_df.to_csv(test_file, mode="a")
+
+
+def make_dataset_whole_text():
+    authors = get_all_authors()
+    data_path = os.path.join(os.getcwd(), "conference_data")
 
     text_column = "text"
     author_column = "author"
@@ -111,16 +148,21 @@ def make_dataset():
 
     for author in authors:
         files = get_all_authors_files(author=author)
-        for file in files:
-            print("Started file: {}".format(file))
-            with io.open(data_path + "/" + author + "/" + file, 'r', encoding='utf8') as infile:
+        for file in files[:-1]:
+            print("Started train file: {}".format(file))
+            with io.open(data_path + "/" + author + "/" + file, 'r', encoding='cp1251') as infile:
                 data = infile.read()
             train_sentences_au, test_sentence_au, train_res_au, test_res_au = prepare_text(author=author, data=data)
-            train_sentences += train_sentences_au
-            test_sentences += test_sentence_au
-            train_res += train_res_au
-            test_res += test_res_au
-            print("Finished file: {}".format(file))
+            train_sentences.append(data)
+            train_res.append(author)
+            # test_res += test_res_au
+            print("Finished train file: {}".format(file))
+        for file in files[-1:]:
+            print("Started test file: {}".format(file))
+            with io.open(data_path + "/" + author + "/" + file, 'r', encoding='cp1251') as infile:
+                data = infile.read()
+            test_sentences.append(data)
+            test_res.append(author)
 
     train_content = {text_column: train_sentences, author_column: train_res}
     test_content = {text_column: test_sentences, author_column: test_res}

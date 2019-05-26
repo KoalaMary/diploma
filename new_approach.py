@@ -52,6 +52,8 @@ from methods.do_methods import *
 #     plt.show()
 
 make_dataset()
+#
+# make_dataset_whole_text()
 
 def text_process(tex):
     # 1. Removal of Punctuation Marks
@@ -82,7 +84,7 @@ y_test = labelencoder.transform(y_test)
 # 80-20 splitting the dataset (80%->Training and 20%->Validation)
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
 # defining the bag-of-words transformer on the text-processed corpus # i.e., text_process() declared in II is executed...
-bow_transformer = CountVectorizer(analyzer=text_process, max_features=10000).fit(X_tr)
+bow_transformer = CountVectorizer(analyzer=text_process, max_features=700).fit(X_tr)
 # # transforming into Bag-of-Words and hence textual data to numeric..
 X_train = bow_transformer.transform(X_tr).toarray() # ONLY TRAINING DATA
 # # transforming into Bag-of-Words and hence textual data to numeric..
@@ -94,11 +96,11 @@ X_test = bow_transformer.transform(X_te).toarray()  # TEST DATA
 # make_dataset()
 # X_train, X_test, y_train, y_test = get_dataset()
 
-# logistic_regression(X_train, X_test, y_train, y_test)
-# random_forests(X_train, X_test, y_train, y_test)
-svm(X_train, X_test, y_train, y_test)
-knn(X_train, X_test, y_train, y_test)
-naive_bayes(X_train, X_test, y_train, y_test)
-skleran_neural(X_train, X_test, y_train, y_test)
+logistic_regression(X_train, X_test, y_train, y_test, labelencoder)
+random_forests(X_train, X_test, y_train, y_test, labelencoder)
+svm(X_train, X_test, y_train, y_test, labelencoder)
+knn(X_train, X_test, y_train, y_test, labelencoder)
+naive_bayes(X_train, X_test, y_train, y_test, labelencoder)
+skleran_neural(X_train, X_test, y_train, y_test, labelencoder)
 # reccurent_neural(X_train, X_test, y_train, y_test)
-# voiting_classifier(X_train, X_test, y_train, y_test)
+voiting_classifier(X_train, X_test, y_train, y_test, labelencoder)

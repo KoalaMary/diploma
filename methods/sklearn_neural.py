@@ -29,4 +29,6 @@ class SKlearnNeural:
         print("Y TEST: {}".format(self.y_test))
         print("svm_accuracy: {}".format(svm_accuracy))
 
+        return y_pred
+
         # print("RES: {}".format(res))

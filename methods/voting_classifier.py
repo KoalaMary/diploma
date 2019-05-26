@@ -57,3 +57,5 @@ class VoitingClassifierMethod:
         # cross_validation = cross_val_score(eclf3, self.X_train, self.y_train, cv=10)
         print("ACCURANCY 3: {}".format(accuracy_score(self.y_test, y_pred3)))
         # print("Cross validation: {}".format(cross_validation))
+
+        return y_pred3
